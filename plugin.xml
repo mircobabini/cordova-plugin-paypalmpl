@@ -10,8 +10,8 @@
 	<author>Liming Xie</author>
 	<license>MIT</license>
 	<keywords>paypal,payment,purchase,pay,buy</keywords>
-    <repo>https://github.com/floatinghotpot/cordova-plugin-paypalmpl.git</repo>
-    <issue>https://github.com/floatinghotpot/cordova-plugin-paypalmpl/issues</issue>
+    <repo>https://github.com/mircobabini/cordova-plugin-paypalmpl.git</repo>
+    <issue>https://github.com/mircobabini/cordova-plugin-paypalmpl/issues</issue>
 
 	<engines>
 	    <engine name="cordova" version=">=3.0" />
