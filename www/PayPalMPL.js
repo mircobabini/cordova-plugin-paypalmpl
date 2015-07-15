@@ -52,7 +52,7 @@ mplExport.PaymentEnv = {
 };
 /**
  * Prepare the payment.
- * 
+ *
  * @param {!Object}
  *            arg arguments to init the MPL. { 'appId': 'APP-80W284485P519543T',
  *            'appEnv': PaymentEnv.ENV_SANDBOX } The PayPal server to be used,
@@ -66,20 +66,20 @@ mplExport.PaymentEnv = {
  */
 
 mplExport.initWithAppID = function(arg, successCallback, failureCallback) {
-	cordova.exec(successCallback, failureCallback, 
+	cordova.exec(successCallback, failureCallback,
 			'PayPalMPL', 'initWithAppID', [ arg ]);
 };
 
 /**
  * get status of paypal init.
- * 
+ *
  * @param {function()}
  *            successCallback The function to call if called successfully.
  * @param {function()}
  *            failureCallback The function to call if unsuccessful.
  */
 mplExport.getStatus = function(successCallback, failureCallback) {
-	cordova.exec(successCallback, failureCallback, 
+	cordova.exec(successCallback, failureCallback,
 			'PayPalMPL', 'getStatus', []);
 };
 
@@ -96,8 +96,8 @@ mplExport.PaymentType = {
 };
 
 /**
- * setPaymentInfo.  
- * 
+ * setPaymentInfo.
+ *
  * @param {!Object} arg The arguments used to set payment info.
  *
  *        {
@@ -118,13 +118,13 @@ mplExport.PaymentType = {
  */
 
 mplExport.setPaymentInfo = function(arg, successCallback, failureCallback) {
-	cordova.exec(successCallback, failureCallback, 
+	cordova.exec(successCallback, failureCallback,
 			'PayPalMPL', 'setPaymentInfo', [ arg ]);
 };
 
 /**
  * pay.
- * 
+ *
  * @param {json} arg Json object reserved.
  * @param {function()} successCallback The function to call if an ad was
  *        requested successfully.
@@ -132,8 +132,22 @@ mplExport.setPaymentInfo = function(arg, successCallback, failureCallback) {
  *        to be requested.
  */
 mplExport.pay = function(arg, successCallback, failureCallback) {
-	cordova.exec(successCallback, failureCallback, 
+	cordova.exec(successCallback, failureCallback,
 			'PayPalMPL', 'pay', [ arg ]);
+};
+
+/**
+ * preapprove.
+ *
+ * @param {json} arg Json object reserved.
+ * @param {function()} successCallback The function to call if an ad was
+ *        requested successfully.
+ * @param {function()} failureCallback The function to call if an ad failed
+ *        to be requested.
+ */
+mplExport.execPreapproveKey = function(arg, successCallback, failureCallback) {
+	cordova.exec(successCallback, failureCallback,
+			'PayPalMPL', 'execPreapproveKey', [ arg ]);
 };
 
 module.exports = mplExport;

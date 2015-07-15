@@ -1,9 +1,8 @@
 /* PayPal PhoneGap Plugin - Map JavaScript API calls to mpl library
  *
- * Copyright (C) 2011, Appception, Inc.. All Rights Reserved.
- * Copyright (C) 2011, Mobile Developer Solutions All Rights Reserved.
+ * Copyright (C) 2014, Mirco Babini
+ * Copyright (C) < 2014, github.com/floatinghotpot
  */
-
 package com.rjfun.cordova.plugin;
 
 import java.math.BigDecimal;
@@ -20,10 +19,8 @@ import org.json.JSONObject;
 
 import com.paypal.android.MEP.CheckoutButton;
 import com.paypal.android.MEP.PayPal;
-import com.paypal.android.MEP.PayPalActivity;
-import com.paypal.android.MEP.PayPalInvoiceData;
-import com.paypal.android.MEP.PayPalInvoiceItem;
 import com.paypal.android.MEP.PayPalPayment;
+import com.paypal.android.MEP.PayPalPreapproval;
 
 import android.app.Activity;
 import android.content.Context;
@@ -53,12 +50,15 @@ public class PayPalMPL extends CordovaPlugin implements OnClickListener {
 	private static final String ACTION_INIT_WITH_APP_ID = "initWithAppID";
 	private static final String ACTION_GET_STATUS = "getStatus";
 	private static final String ACTION_SET_PAYMENT_INFO = "setPaymentInfo";
+	private static final String ACTION_EXEC_PREAPPROVE_KEY = "execPreapproveKey";
 	private static final String ACTION_PAY = "pay";
 	
-	private static final int REQUEST_PAYPAL_CHECKOUT = 2;
 	private static final int PAYPAL_BUTTON_ID = 10001;
+	private static final int REQUEST_PAYPAL_CHECKOUT = 2;
+	public static final int REQUEST_PAYPAL_PREAPPROVE = 3;
 	
 	private CallbackContext payCallback = null;
+	private CallbackContext preapproveCallback = null;
 	
 	@Override
 	public boolean execute(String action, final JSONArray inputs, final CallbackContext callbackContext) throws JSONException {
@@ -84,6 +84,13 @@ public class PayPalMPL extends CordovaPlugin implements OnClickListener {
 	            }
 			});
 			return true;
+		} else if (ACTION_EXEC_PREAPPROVE_KEY.equals(action)) {
+			cordova.getActivity().runOnUiThread(new Runnable() {
+	            public void run() {
+	            	execPreapproveKey(inputs, callbackContext);
+	            }
+			});
+			return true;
 		} else if (ACTION_PAY.equals(action)) {
 			cordova.getActivity().runOnUiThread(new Runnable() {
 	            public void run() {
@@ -97,6 +104,44 @@ public class PayPalMPL extends CordovaPlugin implements OnClickListener {
 		return false;
 	}
 
+	public boolean execPreapproveKey(JSONArray inputs, CallbackContext callbackContext){
+		JSONObject args = null;
+		
+		// String uiLanguage 	= "en_US";
+		// String currencyType = "USD";
+		String merchantName = "Merchant Name";
+		String preapproveKey= "";
+
+		this.preapproveCallback = callbackContext;
+		try {
+			args = inputs.getJSONObject(0);
+			// uiLanguage	 = args.getString("uiLanguage");
+			// currencyType = args.getString("currencyType");
+			merchantName = args.getString("merchantName");
+			preapproveKey= args.getString("preapproveKey");
+
+		} catch (JSONException e) {
+			Log.d(LOGTAG, "Got JSON Exception "+ e.getMessage());
+			callbackContext.sendPluginResult( new PluginResult(Status.JSON_EXCEPTION) );
+			return true;
+		}
+
+		PayPalPreapproval preapproval = new PayPalPreapproval();
+		preapproval.setCurrencyType( currencyType );
+		preapproval.setMerchantName( merchantName );
+
+		PayPal pp = PayPal.getInstance();
+		pp.setPreapprovalKey( preapproveKey );
+		pp.setLanguage( uiLanguage );
+
+		Intent preapproveIntent = pp.preapprove( preapproval, 
+				cordova.getActivity().getApplicationContext() );
+		
+		cordova.getActivity().startActivityForResult(preapproveIntent, REQUEST_PAYPAL_PREAPPROVE);
+//		new PayPalHelperActivity().startActivityForResult(preapproveIntent, REQUEST_PAYPAL_PREAPPROVE);
+		return true;
+	}
+	
 	private boolean executeInitWithAppID(JSONArray inputs, CallbackContext callbackContext) {
 		JSONObject args;
 		
@@ -176,7 +221,6 @@ public class PayPalMPL extends CordovaPlugin implements OnClickListener {
 			}
 			this.ppPayment.setCurrencyType(args.getString("paymentCurrency"));
 			this.ppPayment.setRecipient(args.getString("recipient"));
-		    this.ppPayment.setDescription(args.getString("description"));
 		    this.ppPayment.setMerchantName(args.getString("merchantName"));
 			BigDecimal amount = new BigDecimal(args.getString("subTotal"));
 			amount.round(new MathContext(2, RoundingMode.HALF_UP));
@@ -225,8 +269,6 @@ public class PayPalMPL extends CordovaPlugin implements OnClickListener {
 	}
 	
 	private boolean executePay(JSONArray inputs, CallbackContext callbackContext) {
-		PluginResult result = null;
-		
 		if( this.ppButton != null ) {
 			this.payCallback = callbackContext;
 			checkout();
@@ -263,6 +305,42 @@ public class PayPalMPL extends CordovaPlugin implements OnClickListener {
 		}
 	}
 	
+	public void onPreapproveStatusOK(){
+		Log.i(LOGTAG, "onPreapproveStatusOK");
+		
+		cordova.getActivity().runOnUiThread(new Runnable() {
+            public void run() {
+
+            	PayPalMPL.thisPlugin.webView.loadUrl("javascript:" +
+					"(function() { console.log( 'preapproval OK' ); })();" );
+            }
+		});
+		this.preapproveCallback.sendPluginResult( new PluginResult(Status.OK) );
+	}
+	public void onPreapproveStatusCanceled(){
+		Log.i(LOGTAG, "onPreapproveStatusCanceled");
+		
+		cordova.getActivity().runOnUiThread(new Runnable() {
+            public void run() {
+
+            	PayPalMPL.thisPlugin.webView.loadUrl("javascript:" +
+					"(function() { console.log( 'preapproval Canceled' ); })();" );
+            }
+		});
+		this.preapproveCallback.sendPluginResult( new PluginResult(Status.ERROR) );
+	}
+	public void onPreapproveStatusFailure(){
+		Log.i(LOGTAG, "onPreapproveStatusFailure");
+		
+		cordova.getActivity().runOnUiThread(new Runnable() {
+            public void run() {
+
+            	PayPalMPL.thisPlugin.webView.loadUrl("javascript:" +
+					"(function() { console.log( 'preapproval Failure' ); })();" );
+            }
+		});
+		this.preapproveCallback.sendPluginResult( new PluginResult(Status.ERROR) );
+	}
 	public void onPaymentSucceeded(final String payKey, final String paymentStatus) {
 		Log.i(LOGTAG, "onPaymentSucceeded");
 		
@@ -320,3 +398,4 @@ public class PayPalMPL extends CordovaPlugin implements OnClickListener {
 		this.payCallback.sendPluginResult(new PluginResult(Status.ERROR, paymentStatus));
 	}
 }
+

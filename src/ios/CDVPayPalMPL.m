@@ -268,6 +268,27 @@
     [self.commandDelegate sendPluginResult:pluginResult callbackId:callbackId];
 }
 
+- (void) execPreapproveKey:(CDVInvokedUrlCommand *)command
+{
+    NSString *callbackId = command.callbackId;
+    NSArray *arguments = command.arguments;
+    
+    if ([arguments[0] count] < 2) {
+        NSLog(@"PayPalMPL.preapprove - args missing.");
+        return;
+    }
+    
+    NSLog(@"PayPalMPL.preapprove - called");
+    NSLog( @"%@ %d %d", arguments, [arguments count], [arguments[0] count]);
+    NSString *merchantName = [arguments[0] objectForKey:@"merchantName"];
+    NSString *preapproveKey = [arguments[0] objectForKey:@"preapproveKey"];
+
+    NSLog( @"%@ %@", merchantName, preapproveKey);
+    
+    payCallbackId = callbackId;
+    [[PayPal getPayPalInst] preapprovalWithKey:preapproveKey andMerchantName:merchantName];
+}
+
 - (void) pay:(CDVInvokedUrlCommand *)command
 {
     NSString *callbackId = command.callbackId;

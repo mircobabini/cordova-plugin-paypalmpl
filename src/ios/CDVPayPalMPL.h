@@ -43,6 +43,7 @@ typedef enum PaymentStatuses {
 - (void) prepare:(CDVInvokedUrlCommand *)command;
 - (void) setPaymentInfo:(CDVInvokedUrlCommand *)command;
 - (void) pay:(CDVInvokedUrlCommand *)command;
+- (void) execPreapproveKey:(CDVInvokedUrlCommand *)command;
 
 - (void) checkout;
 
