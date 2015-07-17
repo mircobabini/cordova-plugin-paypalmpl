@@ -18,17 +18,17 @@
 #define PAYMENT_INFO_ARG_INDEX    0
 
 typedef enum PaymentStatuses {
-    PAYMENTSTATUS_SUCCESS,
-    PAYMENTSTATUS_FAILED,
-    PAYMENTSTATUS_CANCELED,
+	PAYMENTSTATUS_SUCCESS,
+	PAYMENTSTATUS_FAILED,
+	PAYMENTSTATUS_CANCELED,
 } PaymentStatus;
 
 @interface CDVPayPalMPL : CDVPlugin<PayPalPaymentDelegate> {
 	UIButton* ppButton;
-    PayPalPaymentType pType;
-    PayPalPayment*  ppPayment;
-    PaymentStatus pStatus;
-    NSString * payCallbackId;
+	PayPalPaymentType pType;
+	PayPalPayment*  ppPayment;
+	PaymentStatus pStatus;
+	NSString * payCallbackId;
 }
 
 @property (nonatomic, retain) UIButton* ppButton;
