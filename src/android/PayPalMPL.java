@@ -105,14 +105,20 @@ public class PayPalMPL extends CordovaPlugin implements OnClickListener {
 	}
 
 	public boolean execPreapproveKey(JSONArray inputs, CallbackContext callbackContext){
+		JSONObject args;
+		String uiLanguage;
+		String currencyType;
+		String merchantName;
+		String preapproveKey;
+
 		this.preapproveCallback = callbackContext;
 
 		try {
-			JSONObject args = inputs.getJSONObject(0);
-			String uiLanguage	= args.getString("uiLanguage");
-			String currencyType = args.getString("currencyType");
-			String merchantName = args.getString("merchantName");
-			String preapproveKey= args.getString("preapproveKey");
+			args = inputs.getJSONObject(0);
+			uiLanguage	 = args.getString("uiLanguage");
+			currencyType  = args.getString("currencyType");
+			merchantName  = args.getString("merchantName");
+			preapproveKey = args.getString("preapproveKey");
 
 		} catch (JSONException e) {
 			Log.d(LOGTAG, "Got JSON Exception "+ e.getMessage());
